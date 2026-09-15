@@ -26,7 +26,5 @@ Die Steuerung dafür:
 
 ## Noch offen
 
-* Wählt die Bedienung einen Tisch aus? Davon hängt die Druckerverteilung ab.
-* SumUp: kann das Solo von der SumUp-App auf dem Android-Tablet angesteuert werden?
-* Mineralwasser 1,0 l ist als einziges Wasser nicht pfandpflichtig markiert – Absicht oder übersehen?
-* Gilt der Pflicht-Pfandbon auch für Bestellungen der Bedienungen oder nur an der Bonschleuder?
+* SumUp: 1-Cent-Testzahlung über die SumUp-App auf dem Android-Tablet – nimmt das Solo den Betrag auf diesem Weg an? (Über die Cloud API tut es das nachweislich, das ist aber ein anderer Weg.)
+* Sollen die Flaschengetränke in eine eigene Produktgruppe, damit sich das Pflichtpfand komplett über die Weboberfläche pflegen lässt?

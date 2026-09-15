@@ -95,6 +95,9 @@ echten Testbestellungen; geprüft wurde jeweils die Druckerwarteschlange:
 
 ## Regel
 
+* Gilt **nur an der Bonschleuder**. Die Bedienungen bringen das Leergut selbst
+  zurück – bei ihren Bestellungen wird nie automatisch Pfand berechnet.
+  Maßgeblich ist derselbe Eintrag `singlebonusers` wie bei der Bonschleuder.
 * **Getränk in der Flasche** → Pfandbon wird **zwingend** mitgebucht, mitgedruckt
   und berechnet (2,00 €)
 * **Getränk im Glas** → passiert automatisch **nichts**; die Person an der
@@ -105,33 +108,44 @@ echten Testbestellungen; geprüft wurde jeweils die Druckerwarteschlange:
 Zwei Einträge in `os_config`:
 
 ```sql
--- Artikel-IDs der Flaschengetränke, die Pfand auslösen
-INSERT INTO os_config (name, setting) VALUES ('pfandautotriggers', '13,14,15,19,22');
--- Artikel-ID des Pfandartikels, der dazugebucht wird
+-- Artikel-ID des Pfandartikels, der dazugebucht wird (Pflichtangabe)
 INSERT INTO os_config (name, setting) VALUES ('pfandautoprodid', '27');
+
+-- Variante A: einzelne Artikel-IDs, die Pfand auslösen
+INSERT INTO os_config (name, setting) VALUES ('pfandautotriggers', '13,14,15,16,19,22');
+
+-- Variante B: eine ganze Produktgruppe ist pfandpflichtig (ID der Gruppe)
+INSERT INTO os_config (name, setting) VALUES ('pfandautogroup', '');
 ```
 
-Die IDs stehen in der Administrationsansicht bei den Artikeln bzw. in der
-Tabelle `os_products`. Ist `pfandautotriggers` leer oder fehlt einer der beiden
-Einträge, ist die Automatik abgeschaltet.
+Beide Varianten wirken zusammen: Pfand gibt es, wenn der Artikel in der Liste
+steht **oder** in der pfandpflichtigen Gruppe liegt. Sind beide leer, ist die
+Automatik abgeschaltet.
+
+**Variante B ist die pflegeleichte.** Legt man eine eigene Produktgruppe für die
+Flaschengetränke an, lässt sich die Zuordnung danach vollständig über die
+Weboberfläche erledigen: neuer Artikel in dieser Gruppe = automatisch
+pfandpflichtig, Artikel in eine andere Gruppe verschieben = kein Pflichtpfand.
+Ohne diese Gruppe muss die Artikelliste in Variante A in der Datenbank gepflegt
+werden (z. B. über phpMyAdmin), das geht in der OrderSprinter-Oberfläche nicht.
+
+Die IDs stehen in der Administrationsansicht bei den Artikeln bzw. in den
+Tabellen `os_products` und `os_prodtype`.
 
 ## Getestet
 
 | Testfall | Erwartet | Ergebnis |
 |---|---|---|
 | Kasse: 2× Cola (Flasche) + 1× Pils vom Fass | je Cola ein Bon **und** ein Pfandbon 2,00 €, Pils ohne Pfand | genau so ✓ |
-| Bedienung, Tisch 7: 2× Cola + 1× Hefeweizen | Sammelbon mit beiden Pfandposten, Hefeweizen ohne Pfand | genau so ✓ |
 | `pfandautotriggers` leer | kein automatisches Pfand | kein Pfand ✓ |
-| Gegen die markierte Karte: Cola 0,5 / Wasser 0,5 / Weizen alkoholfrei → Pfand; Wasser 1,0 / Weizen vom Fass → kein Pfand | wie markiert | genau so ✓ |
+| Gegen die markierte Karte: Cola 0,5 / Wasser 0,5 / Wasser 1,0 / Weizen alkoholfrei → Pfand; Weizen vom Fass → kein Pfand | wie markiert | genau so ✓ |
+| Bedienung, Tisch 5: Wasser 0,5 + Cola | **kein** Pfand | kein Pfand ✓ |
+| Gruppentrigger (`pfandautogroup`) statt Artikelliste | Getränk bekommt Pfand, Speise nicht | genau so ✓ |
 
 Die Liste der pfandpflichtigen Artikel entspricht der vom Auftraggeber gelb
-markierten Getränkekarte vom 15.09.2026: Cola 0,5 l, Apfelsaftschorle 0,5 l,
-Mineralwasser 0,5 l, Pils alkoholfrei 0,33 l, Hefeweizen alkoholfrei 0,5 l.
-**Mineralwasser 1,0 l ist bewusst nicht dabei** – es war als einziges der
-Wasser/Limo-Getränke nicht markiert (Rückfrage läuft).
+markierten Getränkekarte vom 15.09.2026, ergänzt um Mineralwasser 1,0 l (die
+fehlende Markierung war laut Auftraggeber ein Versehen): Cola 0,5 l,
+Apfelsaftschorle 0,5 l, Mineralwasser 0,5 l, Mineralwasser 1,0 l,
+Pils alkoholfrei 0,33 l, Hefeweizen alkoholfrei 0,5 l.
 
-## Offen
 
-Zur Zeit greift die Automatik bei **allen** Buchungen, also auch bei den
-Bedienungen. Soll sie nur an der Bonschleuder gelten, lässt sie sich mit einer
-Zeile auf den Kassenbenutzer einschränken – bitte Bescheid geben.

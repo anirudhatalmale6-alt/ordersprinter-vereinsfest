@@ -1642,21 +1642,34 @@ class QueueContent
 	//
 	// NACH EINEM VERSIONSUPDATE VON ORDERSPRINTER ERNEUT EINSPIELEN.
 	// ----------------------------------------------------------------------
-	private function addAutomaticDepositProducts($pdo, $prods)
+	private function addAutomaticDepositProducts($pdo, $prods, $userid)
 	{
+		// Pflichtpfand gilt nur an der Bonschleuder. Die Bedienungen bringen
+		// das Leergut selbst zurueck, dort wird kein Pfand berechnet. Als
+		// Kassenbenutzer gelten dieselben, die auch Einzelbons bekommen
+		// (Konfigurationswert singlebonusers).
+		if ($this->isSingleBonUser($pdo, $userid) !== true) {
+			return $prods;
+		}
+
 		$triggers = CommonUtils::getConfigValue($pdo, 'pfandautotriggers', '');
+		$triggerGroup = CommonUtils::getConfigValue($pdo, 'pfandautogroup', '');
 		$depositProdId = CommonUtils::getConfigValue($pdo, 'pfandautoprodid', '');
-		if (is_null($triggers) || (trim($triggers) === '') || is_null($depositProdId) || (trim($depositProdId) === '')) {
+		if (is_null($depositProdId) || (trim($depositProdId) === '')) {
 			return $prods;
 		}
 
 		$triggerIds = array();
-		foreach (explode(',', $triggers) as $anId) {
-			if (trim($anId) !== '') {
-				$triggerIds[] = intval($anId);
+		if (!is_null($triggers)) {
+			foreach (explode(',', $triggers) as $anId) {
+				if (trim($anId) !== '') {
+					$triggerIds[] = intval($anId);
+				}
 			}
 		}
-		if (count($triggerIds) == 0) {
+		$triggerGroupId = (is_null($triggerGroup) || (trim($triggerGroup) === '')) ? null : intval($triggerGroup);
+
+		if ((count($triggerIds) == 0) && is_null($triggerGroupId)) {
 			return $prods;
 		}
 
@@ -1669,7 +1682,19 @@ class QueueContent
 		$result = array();
 		foreach ($prods as $aProd) {
 			$result[] = $aProd;
-			if (!isset($aProd["prodid"]) || !in_array(intval($aProd["prodid"]), $triggerIds)) {
+			if (!isset($aProd["prodid"])) {
+				continue;
+			}
+			$prodId = intval($aProd["prodid"]);
+			$needsDeposit = in_array($prodId, $triggerIds);
+			if (!$needsDeposit && !is_null($triggerGroupId)) {
+				// Artikel der pfandpflichtigen Produktgruppe. Damit laesst sich
+				// die Zuordnung komplett ueber die Weboberflaeche pflegen:
+				// Artikel in diese Gruppe schieben = Pflichtpfand.
+				$groupRow = CommonUtils::getRowSqlObject($pdo, "SELECT category FROM %products% WHERE id=?", array($prodId));
+				$needsDeposit = (!is_null($groupRow) && ($groupRow !== false) && (intval($groupRow->category) === $triggerGroupId));
+			}
+			if (!$needsDeposit) {
 				continue;
 			}
 			// Der Pfandartikel erbt nur das Ausser-Haus-Kennzeichen des
@@ -1693,7 +1718,7 @@ class QueueContent
 			$theTableid = null; // togo room
 		}
 
-		$prods = $this->addAutomaticDepositProducts($pdo, $prods);
+		$prods = $this->addAutomaticDepositProducts($pdo, $prods, $userid);
 
 		$amountCheck = $this->checkIfNotMoreThanAllowedShallBeOrdered($pdo, $prods);
 		if ($amountCheck['status'] != "OK") {
