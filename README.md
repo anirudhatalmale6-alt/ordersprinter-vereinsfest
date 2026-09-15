@@ -28,5 +28,5 @@ Die Steuerung dafür:
 
 * Wählt die Bedienung einen Tisch aus? Davon hängt die Druckerverteilung ab.
 * SumUp: kann das Solo von der SumUp-App auf dem Android-Tablet angesteuert werden?
-* Pfandbetrag und Liste der Artikel, die immer mit Pfand laufen
-* Automatisches Mitdrucken des Pfandbons (zweite Codeanpassung, noch nicht gebaut)
+* Bestätigung, welche Getränke als Flaschengetränke gelten (aktuell Cola, Apfelsaftschorle, beide Mineralwasser, Pils alkoholfrei)
+* Gilt der Pflicht-Pfandbon auch für Bestellungen der Bedienungen oder nur an der Bonschleuder?

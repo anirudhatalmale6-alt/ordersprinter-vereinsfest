@@ -1623,11 +1623,77 @@ class QueueContent
 	 * managed here as well
 	 * 
 	 */
+	// ----------------------------------------------------------------------
+	// SG HUETTENFELD - ANPASSUNG "PFLICHT-PFANDBON" (Anirudha Talmale)
+	//
+	// Fuer Getraenke in Flaschen muss zwingend ein Pfandbon mitgedruckt und
+	// berechnet werden. OrderSprinter kennt kein Pfand, deshalb wird hier zu
+	// jedem gebuchten Flaschenartikel automatisch ein Pfandartikel in die
+	// Bestellung aufgenommen. Fuer Getraenke im Glas passiert nichts - dort
+	// entscheidet die Person an der Bonschleuder und bucht den Pfandartikel
+	// bei Bedarf von Hand dazu.
+	//
+	// Steuerung ueber zwei Eintraege in der Konfigurationstabelle:
+	//   pfandautotriggers - Komma-Liste der Artikel-IDs, die Pfand ausloesen
+	//                       (die Flaschenartikel)
+	//   pfandautoprodid   - Artikel-ID des Pfandartikels, der dazugebucht wird
+	// Fehlt einer der beiden Werte oder ist er leer, passiert nichts und
+	// OrderSprinter verhaelt sich wie im Original.
+	//
+	// NACH EINEM VERSIONSUPDATE VON ORDERSPRINTER ERNEUT EINSPIELEN.
+	// ----------------------------------------------------------------------
+	private function addAutomaticDepositProducts($pdo, $prods)
+	{
+		$triggers = CommonUtils::getConfigValue($pdo, 'pfandautotriggers', '');
+		$depositProdId = CommonUtils::getConfigValue($pdo, 'pfandautoprodid', '');
+		if (is_null($triggers) || (trim($triggers) === '') || is_null($depositProdId) || (trim($depositProdId) === '')) {
+			return $prods;
+		}
+
+		$triggerIds = array();
+		foreach (explode(',', $triggers) as $anId) {
+			if (trim($anId) !== '') {
+				$triggerIds[] = intval($anId);
+			}
+		}
+		if (count($triggerIds) == 0) {
+			return $prods;
+		}
+
+		$sql = "SELECT longname,priceA FROM %products% WHERE id=?";
+		$depositRow = CommonUtils::getRowSqlObject($pdo, $sql, array(intval($depositProdId)));
+		if (is_null($depositRow) || ($depositRow === false)) {
+			return $prods; // Pfandartikel existiert nicht -> Originalverhalten
+		}
+
+		$result = array();
+		foreach ($prods as $aProd) {
+			$result[] = $aProd;
+			if (!isset($aProd["prodid"]) || !in_array(intval($aProd["prodid"]), $triggerIds)) {
+				continue;
+			}
+			// Der Pfandartikel erbt nur das Ausser-Haus-Kennzeichen des
+			// ausloesenden Getraenks, sonst nichts.
+			$result[] = array(
+				"prodid" => intval($depositProdId),
+				"name" => $depositRow->longname,
+				"price" => $depositRow->priceA,
+				"option" => "",
+				"changedPrice" => "NO",
+				"unitamount" => 1,
+				"togo" => isset($aProd["togo"]) ? $aProd["togo"] : 0
+			);
+		}
+		return $result;
+	}
+
 	public function addProductListToQueueCore($pdo, $ordertime, $theTableid, $prods, $doPrint, $payprinttype, $userid, $quickcash, $order = null, $orderOption = "", $orderSource = self::INTERNAL_ORDER): array
 	{
 		if (intval($theTableid) == 0) {
 			$theTableid = null; // togo room
 		}
+
+		$prods = $this->addAutomaticDepositProducts($pdo, $prods);
 
 		$amountCheck = $this->checkIfNotMoreThanAllowedShallBeOrdered($pdo, $prods);
 		if ($amountCheck['status'] != "OK") {

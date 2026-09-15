@@ -1,11 +1,6 @@
 #!/bin/bash
 # Baut die lokale OrderSprinter-3.0.8-Testinstanz komplett neu auf.
 # MariaDB laeuft in podman auf Port 13306, der Webserver ist PHPs eingebauter Server auf 8765.
-#
-# ACHTUNG: Saemtliche Passwoerter in dieser Datei sind Wegwerfwerte fuer eine
-# rein lokale Testinstanz, die nur auf 127.0.0.1 hoert und nie aus dem Netz
-# erreichbar ist. Sie haben nichts mit der Installation des Vereins zu tun und
-# duerfen dort NICHT verwendet werden.
 set -e
 P=/var/lib/freelancer/projects/40708545
 BASE=http://127.0.0.1:8765
@@ -100,6 +95,13 @@ UPDATE os_config SET setting='Frei'  WHERE name='discountname1';
 INSERT INTO os_config (name,setting)
   SELECT 'singlebonusers','2' FROM DUAL
   WHERE NOT EXISTS (SELECT 1 FROM os_config WHERE name='singlebonusers');
+-- Flaschengetraenke loesen automatisch einen Pfandbon aus, Glasgetraenke nicht
+INSERT INTO os_config (name,setting)
+  SELECT 'pfandautotriggers','13,14,15,16,19' FROM DUAL
+  WHERE NOT EXISTS (SELECT 1 FROM os_config WHERE name='pfandautotriggers');
+INSERT INTO os_config (name,setting)
+  SELECT 'pfandautoprodid','27' FROM DUAL
+  WHERE NOT EXISTS (SELECT 1 FROM os_config WHERE name='pfandautoprodid');
 SQL
 echo "   Konfiguration gesetzt"
 

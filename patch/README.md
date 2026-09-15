@@ -1,6 +1,19 @@
-# Bonschleuder-Anpassung für OrderSprinter 3.0.8
+# Anpassungen für OrderSprinter 3.0.8
 
 SG Hüttenfeld – Kerwe / Vereinsfest
+
+Die Datei `queuecontent.php` enthält **zwei** Anpassungen:
+
+1. **Bonschleuder** – Einzelbons an der Kasse, Sammelbons bei den Bedienungen
+2. **Pflicht-Pfandbon** – für Flaschengetränke wird der Pfandbon automatisch
+   mitgebucht und mitgedruckt
+
+Beide sind über Einträge in der Konfigurationstabelle abschaltbar. Ohne diese
+Einträge verhält sich OrderSprinter exakt wie im Original.
+
+---
+
+# 1. Bonschleuder
 
 ## Wozu das gut ist
 
@@ -75,3 +88,43 @@ echten Testbestellungen; geprüft wurde jeweils die Druckerwarteschlange:
 | Janine, Tisch 3, 5× Pils + 2× Bratwurst | 1 Getränkejob „5x Pils“ Drucker 2, 1 Speisejob Drucker 1 | genau so ✓ |
 | `singlebonusers` leer | Originalverhalten | Originalverhalten ✓ |
 | `oneprodworkrecf=1`, `oneprodworkrecd=0` | Getränkebon vorhanden | vorhanden ✓ (Originalfehler behoben) |
+
+---
+
+# 2. Pflicht-Pfandbon für Flaschengetränke
+
+## Regel
+
+* **Getränk in der Flasche** → Pfandbon wird **zwingend** mitgebucht, mitgedruckt
+  und berechnet (2,00 €)
+* **Getränk im Glas** → passiert automatisch **nichts**; die Person an der
+  Bonschleuder entscheidet und bucht den Artikel *Pfandbon Glas* bei Bedarf dazu
+
+## Einstellung
+
+Zwei Einträge in `os_config`:
+
+```sql
+-- Artikel-IDs der Flaschengetränke, die Pfand auslösen
+INSERT INTO os_config (name, setting) VALUES ('pfandautotriggers', '13,14,15,16,19');
+-- Artikel-ID des Pfandartikels, der dazugebucht wird
+INSERT INTO os_config (name, setting) VALUES ('pfandautoprodid', '27');
+```
+
+Die IDs stehen in der Administrationsansicht bei den Artikeln bzw. in der
+Tabelle `os_products`. Ist `pfandautotriggers` leer oder fehlt einer der beiden
+Einträge, ist die Automatik abgeschaltet.
+
+## Getestet
+
+| Testfall | Erwartet | Ergebnis |
+|---|---|---|
+| Kasse: 2× Cola (Flasche) + 1× Pils vom Fass | je Cola ein Bon **und** ein Pfandbon 2,00 €, Pils ohne Pfand | genau so ✓ |
+| Bedienung, Tisch 7: 2× Cola + 1× Hefeweizen | Sammelbon mit beiden Pfandposten, Hefeweizen ohne Pfand | genau so ✓ |
+| `pfandautotriggers` leer | kein automatisches Pfand | kein Pfand ✓ |
+
+## Offen
+
+Zur Zeit greift die Automatik bei **allen** Buchungen, also auch bei den
+Bedienungen. Soll sie nur an der Bonschleuder gelten, lässt sie sich mit einer
+Zeile auf den Kassenbenutzer einschränken – bitte Bescheid geben.
