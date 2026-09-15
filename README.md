@@ -28,5 +28,5 @@ Die Steuerung dafür:
 
 * Wählt die Bedienung einen Tisch aus? Davon hängt die Druckerverteilung ab.
 * SumUp: kann das Solo von der SumUp-App auf dem Android-Tablet angesteuert werden?
-* Bestätigung, welche Getränke als Flaschengetränke gelten (aktuell Cola, Apfelsaftschorle, beide Mineralwasser, Pils alkoholfrei)
+* Mineralwasser 1,0 l ist als einziges Wasser nicht pfandpflichtig markiert – Absicht oder übersehen?
 * Gilt der Pflicht-Pfandbon auch für Bestellungen der Bedienungen oder nur an der Bonschleuder?

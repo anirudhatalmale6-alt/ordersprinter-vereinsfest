@@ -106,7 +106,7 @@ Zwei Einträge in `os_config`:
 
 ```sql
 -- Artikel-IDs der Flaschengetränke, die Pfand auslösen
-INSERT INTO os_config (name, setting) VALUES ('pfandautotriggers', '13,14,15,16,19');
+INSERT INTO os_config (name, setting) VALUES ('pfandautotriggers', '13,14,15,19,22');
 -- Artikel-ID des Pfandartikels, der dazugebucht wird
 INSERT INTO os_config (name, setting) VALUES ('pfandautoprodid', '27');
 ```
@@ -122,6 +122,13 @@ Einträge, ist die Automatik abgeschaltet.
 | Kasse: 2× Cola (Flasche) + 1× Pils vom Fass | je Cola ein Bon **und** ein Pfandbon 2,00 €, Pils ohne Pfand | genau so ✓ |
 | Bedienung, Tisch 7: 2× Cola + 1× Hefeweizen | Sammelbon mit beiden Pfandposten, Hefeweizen ohne Pfand | genau so ✓ |
 | `pfandautotriggers` leer | kein automatisches Pfand | kein Pfand ✓ |
+| Gegen die markierte Karte: Cola 0,5 / Wasser 0,5 / Weizen alkoholfrei → Pfand; Wasser 1,0 / Weizen vom Fass → kein Pfand | wie markiert | genau so ✓ |
+
+Die Liste der pfandpflichtigen Artikel entspricht der vom Auftraggeber gelb
+markierten Getränkekarte vom 15.09.2026: Cola 0,5 l, Apfelsaftschorle 0,5 l,
+Mineralwasser 0,5 l, Pils alkoholfrei 0,33 l, Hefeweizen alkoholfrei 0,5 l.
+**Mineralwasser 1,0 l ist bewusst nicht dabei** – es war als einziges der
+Wasser/Limo-Getränke nicht markiert (Rückfrage läuft).
 
 ## Offen
 

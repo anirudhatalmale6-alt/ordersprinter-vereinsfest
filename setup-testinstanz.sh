@@ -97,7 +97,7 @@ INSERT INTO os_config (name,setting)
   WHERE NOT EXISTS (SELECT 1 FROM os_config WHERE name='singlebonusers');
 -- Flaschengetraenke loesen automatisch einen Pfandbon aus, Glasgetraenke nicht
 INSERT INTO os_config (name,setting)
-  SELECT 'pfandautotriggers','13,14,15,16,19' FROM DUAL
+  SELECT 'pfandautotriggers','13,14,15,19,22' FROM DUAL
   WHERE NOT EXISTS (SELECT 1 FROM os_config WHERE name='pfandautotriggers');
 INSERT INTO os_config (name,setting)
   SELECT 'pfandautoprodid','27' FROM DUAL
