@@ -1,0 +1,81 @@
+--- patch/queuecontent.php.original	2026-09-15 13:35:51.315153981 +0000
++++ patch/queuecontent.php	2026-09-15 13:35:51.319153969 +0000
+@@ -637,29 +637,72 @@
+ 		return $retArr;
+ 	}
+ 
++	// ----------------------------------------------------------------------
++	// SG HUETTENFELD - ANPASSUNG "BONSCHLEUDER" (Anirudha Talmale)
++	//
++	// Im Original entscheiden allein die Konfigurationswerte oneprodworkrecf
++	// (Speisen) und oneprodworkrecd (Getraenke), ob je Artikel ein eigener
++	// Arbeitsbon gedruckt wird. Diese Werte gelten fuer die ganze Installation.
++	// Fuer das Vereinsfest werden aber beide Betriebsarten gleichzeitig
++	// gebraucht: an der Kasse ein Bon je Artikel (5 Bier = 5 Bons), bei den
++	// Bedienungen dagegen ein Sammelbon je Bestellung.
++	//
++	// Die Entscheidung haengt deshalb hier am buchenden Benutzer. In der
++	// Konfigurationstabelle steht unter dem Namen 'singlebonusers' eine mit
++	// Komma getrennte Liste von Benutzer-IDs (z.B. "2" fuer den Benutzer
++	// Kasse). Wer darin steht, bekommt Einzelbons, alle anderen Sammelbons.
++	// Ist der Eintrag leer oder nicht vorhanden, verhaelt sich die Funktion
++	// exakt wie das Original.
++	//
++	// Nebeneffekt: die Originalfassung verliert die Getraenkebons, wenn
++	// oneprodworkrecf=1 und oneprodworkrecd=0 gesetzt sind. Diese Fassung
++	// behandelt Speisen und Getraenke getrennt und kann das nicht.
++	//
++	// NACH EINEM VERSIONSUPDATE VON ORDERSPRINTER MUSS DIESE FUNKTION
++	// ERNEUT EINGESETZT WERDEN.
++	// ----------------------------------------------------------------------
++	private function isSingleBonUser($pdo, $userid)
++	{
++		$userList = CommonUtils::getConfigValue($pdo, 'singlebonusers', '');
++		if (is_null($userList) || (trim($userList) === '')) {
++			return null; // keine Benutzerliste gepflegt -> Originalverhalten
++		}
++		foreach (explode(',', $userList) as $anId) {
++			if (trim($anId) !== '' && intval($anId) === intval($userid)) {
++				return true;
++			}
++		}
++		return false;
++	}
++
+ 	private function doWorkPrint($pdo, $theTableid, $insertedQueueIds, $username, $userid, $payPrintType, $lang, $declareReadyDelivered = true, string $orderOption = "")
+ 	{
+ 		$oneProdForEachWorkRecf = CommonUtils::getConfigValue($pdo, 'oneprodworkrecf', 0);
+ 		$oneProdForEachWorkRecd = CommonUtils::getConfigValue($pdo, 'oneprodworkrecd', 0);
+ 
++		$singleBonUser = $this->isSingleBonUser($pdo, $userid);
++		if (!is_null($singleBonUser)) {
++			$oneProdForEachWorkRecf = $singleBonUser ? 1 : 0;
++			$oneProdForEachWorkRecd = $singleBonUser ? 1 : 0;
++		}
++
+ 		$foodIds = $this->filterKindQueueIds($pdo, $insertedQueueIds, 0);
+ 		$drinkIds = $this->filterKindQueueIds($pdo, $insertedQueueIds, 1);
+ 
+-		if ($oneProdForEachWorkRecf == 0) {
+-			$this->doWorkPrintCore($pdo, $theTableid, $foodIds, $username, $userid, $payPrintType, $lang, $declareReadyDelivered, $orderOption);
+-			$this->doWorkPrintCore($pdo, $theTableid, $drinkIds, $username, $userid, $payPrintType, $lang, $declareReadyDelivered, $orderOption);
+-		}
+-		
+-
+ 		if ($oneProdForEachWorkRecf == 1) {
+ 			foreach ($foodIds as $aQueueId) {
+ 				$this->doWorkPrintCore($pdo, $theTableid, array($aQueueId), $username, $userid, $payPrintType, $lang, $declareReadyDelivered, $orderOption);
+ 			}
++		} else {
++			$this->doWorkPrintCore($pdo, $theTableid, $foodIds, $username, $userid, $payPrintType, $lang, $declareReadyDelivered, $orderOption);
+ 		}
++
+ 		if ($oneProdForEachWorkRecd == 1) {
+ 			foreach ($drinkIds as $aQueueId) {
+ 				$this->doWorkPrintCore($pdo, $theTableid, array($aQueueId), $username, $userid, $payPrintType, $lang, $declareReadyDelivered, $orderOption);
+ 			}
++		} else {
++			$this->doWorkPrintCore($pdo, $theTableid, $drinkIds, $username, $userid, $payPrintType, $lang, $declareReadyDelivered, $orderOption);
+ 		}
+ 	}
+ 

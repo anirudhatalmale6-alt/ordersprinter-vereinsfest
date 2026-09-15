@@ -1,0 +1,35 @@
+Speisen = KBF = 1 = RD
+ Bratwurst mit Brötchen; 4,00 # Kurzname: Bratw. Brötchen
+ Bratwurst mit Pommes; 6,00 # Kurzname: Bratw. Pommes
+ Currywurst mit Brötchen; 4,50 # Kurzname: Curryw. Brötchen
+ Currywurst mit Pommes; 6,50 # Kurzname: Curryw. Pommes
+ Wurstsalat mit Brötchen; 5,50 # Kurzname: Wurstsal. Brötchen
+ Wurstsalat mit Pommes; 7,50 # Kurzname: Wurstsal. Pommes
+ Folienkartoffel mit Sour Cream; 4,00 # Kurzname: Folienkartoffel
+ Portion Kochkäse; 4,00 # Kurzname: Kochkäse
+ Portion Pommes / Kartoffelsalat; 3,00 # Kurzname: Pommes/Kart.salat
+ Schnitzelbrötchen; 5,00 # Kurzname: Schnitzelbrötchen
+ Schnitzel Pommes Natur-Bratensoße; 8,50 # Kurzname: Schnitzel Natur
+ Schnitzel Pommes Kochkäse; 9,50 # Kurzname: Schnitzel Kochkäse
+Getränke = KBD = 2 = RD
+ Cola 0,5 l; 3,50 # Kurzname: Cola 0,5
+ Apfelsaftschorle 0,5 l; 3,00 # Kurzname: Apfelschorle 0,5
+ Mineralwasser 0,5 l; 2,50 # Kurzname: Wasser 0,5
+ Mineralwasser 1,0 l; 3,50 # Kurzname: Wasser 1,0
+ Edel-Pils vom Fass 0,4 l; 4,00 # Kurzname: Pils 0,4
+ Radler vom Fass 0,4 l; 4,00 # Kurzname: Radler 0,4
+ Pils alkoholfrei Flasche 0,33 l; 3,00 # Kurzname: Pils alkfrei
+ Hefeweizen vom Fass 0,5 l; 4,50 # Kurzname: Hefeweizen 0,5
+ Weizenradler vom Fass 0,5 l; 4,50 # Kurzname: Weizenradler 0,5
+ Hefeweizen alkoholfrei 0,5 l; 4,00 # Kurzname: Weizen alkfrei
+ Apfelwein / Apfelweinschorle 0,4 l; 3,50 # Kurzname: Apfelwein 0,4
+ Rieslingschorle 0,4 l; 4,50 # Kurzname: Riesling 0,4
+ Weißherbstschorle 0,4 l; 4,50 # Kurzname: Weißherbst 0,4
+Pfand = KBD = 2 = RD
+ Pfandbon Glas; 2,00 # Kurzname: Pfand Glas
+ Pfandbon Flasche; 2,00 # Kurzname: Pfand Flasche
+Freibons = KBF = 1 = RD
+ Freibon Helfer; 0,00 # Kurzname: Helfer
+ Freibon Einladung Vorsitzender; 0,00 # Kurzname: Einladung
+ Freibon Gutschein Anwohner; 0,00 # Kurzname: Anwohner
+ Freibon Gutschein Volkslauf; 0,00 # Kurzname: Volkslauf
