@@ -149,3 +149,61 @@ Apfelsaftschorle 0,5 l, Mineralwasser 0,5 l, Mineralwasser 1,0 l,
 Pils alkoholfrei 0,33 l, Hefeweizen alkoholfrei 0,5 l.
 
 
+
+---
+
+# Risiko bei Versionsupdates und wie man es ausschaltet
+
+## Das Risiko, benannt
+
+Diese Datei ersetzt eine Datei des Entwicklers. Bei einem Versionsupdate von
+OrderSprinter wird sie überschrieben, die Zusatzfunktionen sind dann weg. Spielt
+man sie danach einfach wieder ein, gilt:
+
+* Hat der Entwickler `queuecontent.php` im Update **nicht** angefasst, ist das
+  gefahrlos.
+* Hat er sie **doch** angefasst, würde man seine Änderungen mit einer alten
+  Fassung überschreiben. Das Ergebnis wäre nicht vorhersagbar – genau das darf
+  man nicht tun.
+
+## Die Prüfung, die das entscheidet
+
+Deshalb liegt in diesem Ordner zusätzlich `queuecontent-3.0.8-original.php` –
+die unveränderte Originaldatei aus OrderSprinter 3.0.8.
+
+Nach einem Update, **bevor** irgendetwas ersetzt wird:
+
+1. Die Datei `php/queuecontent.php` aus der frisch aktualisierten Installation
+   herunterladen.
+2. Sie mit `queuecontent-3.0.8-original.php` vergleichen.
+3. **Identisch** → der Entwickler hat nichts geändert. `queuecontent.php` aus
+   diesem Ordner hochladen, fertig.
+4. **Unterschiedlich** → nicht überschreiben. Die neue Datei schicken, die
+   Anpassung wird auf die neue Fassung übertragen. Betroffen sind nur zwei
+   Funktionen, das ist eine überschaubare Arbeit.
+
+Prüfsumme der Originaldatei aus 3.0.8 (MD5):
+
+```
+6eb987ea248925b45178d1e32db39abf   queuecontent-3.0.8-original.php
+```
+
+Unter Windows: `certutil -hashfile queuecontent.php MD5`
+
+Stimmt die Prüfsumme der heruntergeladenen Datei mit dieser überein, ist Fall 3
+gegeben. Ein Vergleichsprogramm wie WinMerge tut es auch.
+
+## Zwei Dinge, die das Risiko zusätzlich entschärfen
+
+**Ein Update ist freiwillig.** OrderSprinter aktualisiert sich nicht von selbst.
+Das Auto-Update läuft nur, wenn ein Administrator in der Administrationsansicht
+den Update-Knopf drückt. Während des Festes kann also nichts unbemerkt kaputt
+gehen. Wer das System zwei- bis dreimal im Jahr einsetzt, kann bei einer
+funktionierenden Version bleiben und nur dann aktualisieren, wenn es einen Grund
+dafür gibt.
+
+**Warum es kein Plugin gibt.** OrderSprinter besitzt eine Plugin-Schnittstelle,
+die ein Update überstehen würde. Sie hat aber nur zwei Einsprungpunkte,
+`createBill` und `createClosing`. Im Weg der Bestellannahme und des Bondrucks –
+dort, wo beide Anpassungen sitzen – gibt es keinen Einsprungpunkt. Ein
+update-sicheres Plugin ist deshalb nicht möglich.
